@@ -25,7 +25,10 @@ import {
   updateTokenHourData,
   updateAlgebraDayData,
   updateAlgebraHourData,
-  updateFeeHourData
+  updateFeeHourData,
+  updateUserVolumeHourData,
+  updateUserVolumeDayData,
+  updateUserVolumeAllTimeData
 } from '../utils/intervalUpdates'
 import { createTick } from '../utils/tick'
 
@@ -548,6 +551,13 @@ export function handleSwap(event: SwapEvent): void {
   pool.save()
   token0.save()
   token1.save()
+
+  // Update user volume metrics
+  // We are tracking based on amount of USD tracked
+  updateUserVolumeAllTimeData(event.transaction.from, amountTotalUSDTracked, event)
+  updateUserVolumeDayData(event.transaction.from, amountTotalUSDTracked, event)
+  updateUserVolumeHourData(event.transaction.from, amountTotalUSDTracked, event)
+
 }
 
 export function handleSetCommunityFee(event: CommunityFee): void {
