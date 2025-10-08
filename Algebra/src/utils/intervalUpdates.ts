@@ -2,6 +2,7 @@ import { ZERO_BD, ZERO_BI, ONE_BI } from './constants'
 /* eslint-disable prefer-const */
 import {
   AlgebraDayData,
+  AlgebraHourData,
   Factory,
   Pool,
   PoolDayData,
@@ -10,12 +11,11 @@ import {
   TokenHourData,
   Bundle,
   PoolHourData,
-  TickDayData,
   FeeHourData,
-  Tick
-} from './../types/schema'
-import { FACTORY_ADDRESS } from './constants'
-import { ethereum, BigInt } from '@graphprotocol/graph-ts'
+  UserVolumeAllTimeData,
+} from '../types/schema'
+import { FACTORY_ADDRESS } from './chain'
+import { ethereum, BigInt, BigDecimal, Bytes } from '@graphprotocol/graph-ts'
 
 
 /**
@@ -43,6 +43,30 @@ export function updateAlgebraDayData(event: ethereum.Event): AlgebraDayData {
 }
 
 
+/**
+ * Tracks global aggregate data over hour windows
+ * @param event
+ */
+export function updateAlgebraHourData(event: ethereum.Event): AlgebraHourData {
+  let algebra = Factory.load(FACTORY_ADDRESS)!
+  let timestamp = event.block.timestamp.toI32()
+  let hourID = timestamp / 3600 // rounded
+  let hourStartTimestamp = hourID * 3600
+  let algebraHourData = AlgebraHourData.load(hourID.toString())
+  if (algebraHourData === null) {
+    algebraHourData = new AlgebraHourData(hourID.toString())
+    algebraHourData.date = hourStartTimestamp
+    algebraHourData.volumeMatic = ZERO_BD
+    algebraHourData.volumeUSD = ZERO_BD
+    algebraHourData.volumeUSDUntracked = ZERO_BD
+    algebraHourData.feesUSD = ZERO_BD
+  }
+  algebraHourData.tvlUSD = algebra.totalValueLockedUSD
+  algebraHourData.txCount = algebra.txCount
+  algebraHourData.save()
+  return algebraHourData as AlgebraHourData
+}
+
 export function updatePoolDayData(event: ethereum.Event): PoolDayData {
   let timestamp = event.block.timestamp.toI32()
   let dayID = timestamp / 86400
@@ -66,8 +90,6 @@ export function updatePoolDayData(event: ethereum.Event): PoolDayData {
     poolDayData.untrackedVolumeUSD = ZERO_BD
     poolDayData.feesUSD = ZERO_BD
     poolDayData.txCount = ZERO_BI
-    poolDayData.feeGrowthGlobal0X128 = ZERO_BI
-    poolDayData.feeGrowthGlobal1X128 = ZERO_BI
     poolDayData.open = pool.token0Price
     poolDayData.high = pool.token0Price
     poolDayData.low = pool.token0Price
@@ -83,8 +105,7 @@ export function updatePoolDayData(event: ethereum.Event): PoolDayData {
 
   poolDayData.liquidity = pool.liquidity
   poolDayData.sqrtPrice = pool.sqrtPrice
-  poolDayData.feeGrowthGlobal0X128 = pool.feeGrowthGlobal0X128
-  poolDayData.feeGrowthGlobal1X128 = pool.feeGrowthGlobal1X128
+
   poolDayData.token0Price = pool.token0Price
   poolDayData.token1Price = pool.token1Price
   poolDayData.tick = pool.tick
@@ -123,6 +144,11 @@ export function updateFeeHourData(event: ethereum.Event, Fee: BigInt): void{
       FeeHourDataEntity.endFee = Fee
       FeeHourDataEntity.maxFee = Fee 
       FeeHourDataEntity.minFee = Fee 
+    } else {
+      FeeHourDataEntity.startFee = ZERO_BI
+      FeeHourDataEntity.endFee = ZERO_BI
+      FeeHourDataEntity.maxFee = ZERO_BI 
+      FeeHourDataEntity.minFee = ZERO_BI 
     }
 
   }
@@ -150,8 +176,7 @@ export function updatePoolHourData(event: ethereum.Event): PoolHourData {
     poolHourData.untrackedVolumeUSD = ZERO_BD
     poolHourData.txCount = ZERO_BI
     poolHourData.feesUSD = ZERO_BD
-    poolHourData.feeGrowthGlobal0X128 = ZERO_BI
-    poolHourData.feeGrowthGlobal1X128 = ZERO_BI
+
     poolHourData.open = pool.token0Price
     poolHourData.high = pool.token0Price
     poolHourData.low = pool.token0Price
@@ -169,8 +194,6 @@ export function updatePoolHourData(event: ethereum.Event): PoolHourData {
   poolHourData.sqrtPrice = pool.sqrtPrice
   poolHourData.token0Price = pool.token0Price
   poolHourData.token1Price = pool.token1Price
-  poolHourData.feeGrowthGlobal0X128 = pool.feeGrowthGlobal0X128
-  poolHourData.feeGrowthGlobal1X128 = pool.feeGrowthGlobal1X128
   poolHourData.close = pool.token0Price
   poolHourData.tick = pool.tick
   poolHourData.tvlUSD = pool.totalValueLockedUSD
@@ -268,28 +291,29 @@ export function updateTokenHourData(token: Token, event: ethereum.Event): TokenH
   return tokenHourData as TokenHourData
 }
 
-export function updateTickDayData(tick: Tick, event: ethereum.Event): TickDayData {
+export function updateUserVolumeAllTimeData(
+  user: Bytes,
+  volumeUSD: BigDecimal,
+  event: ethereum.Event
+): void {
   let timestamp = event.block.timestamp.toI32()
-  let dayID = timestamp / 86400
-  let dayStartTimestamp = dayID * 86400
-  let tickDayDataID = tick.id.concat('-').concat(dayID.toString())
-  let tickDayData = TickDayData.load(tickDayDataID)
-  if (tickDayData === null) {
-    tickDayData = new TickDayData(tickDayDataID)
-    tickDayData.date = dayStartTimestamp
-    tickDayData.pool = tick.pool
-    tickDayData.tick = tick.id
+  let date = timestamp / 86400 * 86400 // start of the day
+  let userVolumeAllTimeDataID = user.toHexString()
+  let userVolumeAllTimeData = UserVolumeAllTimeData.load(userVolumeAllTimeDataID)
+
+  if(userVolumeAllTimeData === null) {
+    userVolumeAllTimeData = new UserVolumeAllTimeData(userVolumeAllTimeDataID)
+    userVolumeAllTimeData.user = user
+    userVolumeAllTimeData.volumeUSD = ZERO_BD
+    userVolumeAllTimeData.firstTradeDate = date
+    userVolumeAllTimeData.lastTradeDate = date
   }
-  tickDayData.liquidityGross = tick.liquidityGross
-  tickDayData.liquidityNet = tick.liquidityNet
-  tickDayData.volumeToken0 = tick.volumeToken0
-  tickDayData.volumeToken1 = tick.volumeToken0
-  tickDayData.volumeUSD = tick.volumeUSD
-  tickDayData.feesUSD = tick.feesUSD
-  tickDayData.feeGrowthOutside0X128 = tick.feeGrowthOutside0X128
-  tickDayData.feeGrowthOutside1X128 = tick.feeGrowthOutside1X128
 
-  tickDayData.save()
-
-  return tickDayData as TickDayData
+  userVolumeAllTimeData.volumeUSD = userVolumeAllTimeData.volumeUSD.plus(volumeUSD)
+  
+  if (userVolumeAllTimeData.lastTradeDate < date) {
+    userVolumeAllTimeData.lastTradeDate = date
+  }
+  
+  userVolumeAllTimeData.save()
 }
