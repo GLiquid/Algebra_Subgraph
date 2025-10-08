@@ -14,13 +14,13 @@ export const MINIMUM_NATIVE_LOCKED = BigDecimal.fromString('0')
 // Token lists for tracking volume and liquidity
 export const WHITELIST_TOKENS: string[] = [
   '0x5555555555555555555555555555555555555555', // WMATIC
-  '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', // USDC
-  '0x5aefba317baba46eaf98fd6f381d07673bca6467', // USDT 
+  '0xb88339CB7199b77E23DB6E890353E22632Ba630f', // USDC
+  '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', // USDT 
   '0x49a390a3dfd2d01389f799965f3af5961f87d228'
 ]
 
 // Stable coins for USD pricing (tokens with stable $1 value)
 export const STABLE_COINS: string[] = [
-  '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', // USDC
-  '0xabac6f23fdf1313fc2e9c9244f666157ccd32990' // SUDT
+  '0xb8ce59fc3717ada4c02eadf9682a9e934f625ebb', // USDT
+  '0xb88339CB7199b77E23DB6E890353E22632Ba630f' // USDC
 ]

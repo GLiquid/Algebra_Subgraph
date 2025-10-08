@@ -13,8 +13,6 @@ import {
   PoolHourData,
   FeeHourData,
   UserVolumeAllTimeData,
-  UserVolumeDayData,
-  UserVolumeHourData,
 } from '../types/schema'
 import { FACTORY_ADDRESS } from './chain'
 import { ethereum, BigInt, BigDecimal, Bytes } from '@graphprotocol/graph-ts'
@@ -309,12 +307,6 @@ export function updateUserVolumeAllTimeData(
     userVolumeAllTimeData.volumeUSD = ZERO_BD
     userVolumeAllTimeData.firstTradeDate = date
     userVolumeAllTimeData.lastTradeDate = date
-    userVolumeAllTimeData.topDayVolumeUSD = ZERO_BD
-    userVolumeAllTimeData.topDayDate = date
-    userVolumeAllTimeData.topHourVolumeUSD = ZERO_BD
-    userVolumeAllTimeData.topHourDate = date
-    userVolumeAllTimeData.prevDayVolume = null
-    userVolumeAllTimeData.prevHourVolume = null
   }
 
   userVolumeAllTimeData.volumeUSD = userVolumeAllTimeData.volumeUSD.plus(volumeUSD)
