@@ -1,0 +1,287 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ReflexRouter",
+  "sourceName": "contracts/ReflexRouter.sol",
+  "abi": [
+    { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+    {
+      "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+      "name": "SafeERC20FailedOperation",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "bytes32", "name": "triggerPoolId", "type": "bytes32" },
+        { "indexed": false, "internalType": "uint112", "name": "swapAmountIn", "type": "uint112" },
+        { "indexed": false, "internalType": "bool", "name": "token0In", "type": "bool" },
+        { "indexed": false, "internalType": "uint256", "name": "quoteProfit", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "profit", "type": "uint256" },
+        { "indexed": false, "internalType": "address", "name": "profitToken", "type": "address" },
+        { "indexed": true, "internalType": "address", "name": "recipient", "type": "address" }
+      ],
+      "name": "BackrunExecuted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": false, "internalType": "address[]", "name": "recipients", "type": "address[]" },
+        { "indexed": false, "internalType": "uint256[]", "name": "sharesBps", "type": "uint256[]" },
+        { "indexed": false, "internalType": "uint256", "name": "variedShareBps", "type": "uint256" }
+      ],
+      "name": "DefaultConfigUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "oldQuoter", "type": "address" },
+        { "indexed": true, "internalType": "address", "name": "newQuoter", "type": "address" }
+      ],
+      "name": "ReflexQuoterUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "bytes32", "name": "configId", "type": "bytes32" },
+        { "indexed": false, "internalType": "address[]", "name": "recipients", "type": "address[]" },
+        { "indexed": false, "internalType": "uint256[]", "name": "sharesBps", "type": "uint256[]" },
+        { "indexed": false, "internalType": "uint256", "name": "variedShareBps", "type": "uint256" }
+      ],
+      "name": "SharesUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "bytes32", "name": "configId", "type": "bytes32" },
+        { "indexed": true, "internalType": "address", "name": "token", "type": "address" },
+        { "indexed": false, "internalType": "uint256", "name": "totalAmount", "type": "uint256" },
+        { "indexed": false, "internalType": "address[]", "name": "recipients", "type": "address[]" },
+        { "indexed": false, "internalType": "uint256[]", "name": "amounts", "type": "uint256[]" },
+        { "indexed": false, "internalType": "address", "name": "variedRecipient", "type": "address" },
+        { "indexed": false, "internalType": "uint256", "name": "variedAmount", "type": "uint256" }
+      ],
+      "name": "SplitExecuted",
+      "type": "event"
+    },
+    { "stateMutability": "payable", "type": "fallback" },
+    {
+      "inputs": [],
+      "name": "DEFAULT_CONFIG_ID",
+      "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "TOTAL_BPS",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            { "internalType": "address", "name": "target", "type": "address" },
+            { "internalType": "uint256", "name": "value", "type": "uint256" },
+            { "internalType": "bytes", "name": "callData", "type": "bytes" }
+          ],
+          "internalType": "struct IReflexRouter.ExecuteParams",
+          "name": "executeParams",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            { "internalType": "bytes32", "name": "triggerPoolId", "type": "bytes32" },
+            { "internalType": "uint112", "name": "swapAmountIn", "type": "uint112" },
+            { "internalType": "bool", "name": "token0In", "type": "bool" },
+            { "internalType": "address", "name": "recipient", "type": "address" },
+            { "internalType": "bytes32", "name": "configId", "type": "bytes32" }
+          ],
+          "internalType": "struct IReflexRouter.BackrunParams[]",
+          "name": "backrunParams",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "backrunedExecute",
+      "outputs": [
+        { "internalType": "bool", "name": "success", "type": "bool" },
+        { "internalType": "bytes", "name": "returnData", "type": "bytes" },
+        { "internalType": "uint256[]", "name": "profits", "type": "uint256[]" },
+        { "internalType": "address[]", "name": "profitTokens", "type": "address[]" }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+      "name": "configs",
+      "outputs": [{ "internalType": "uint256", "name": "variedShareBps", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "bytes32", "name": "configId", "type": "bytes32" }],
+      "name": "getConfig",
+      "outputs": [
+        {
+          "components": [
+            { "internalType": "address[]", "name": "recipients", "type": "address[]" },
+            { "internalType": "uint256[]", "name": "sharesBps", "type": "uint256[]" },
+            { "internalType": "uint256", "name": "variedShareBps", "type": "uint256" }
+          ],
+          "internalType": "struct IConfigurableRevenueDistributor.SplitConfig",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDefaultConfig",
+      "outputs": [
+        {
+          "components": [
+            { "internalType": "address[]", "name": "recipients", "type": "address[]" },
+            { "internalType": "uint256[]", "name": "sharesBps", "type": "uint256[]" },
+            { "internalType": "uint256", "name": "variedShareBps", "type": "uint256" }
+          ],
+          "internalType": "struct IConfigurableRevenueDistributor.SplitConfig",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDefaultConfigId",
+      "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "bytes32", "name": "configId", "type": "bytes32" }],
+      "name": "getRecipients",
+      "outputs": [
+        { "internalType": "address[]", "name": "", "type": "address[]" },
+        { "internalType": "uint256[]", "name": "", "type": "uint256[]" },
+        { "internalType": "uint256", "name": "", "type": "uint256" }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getReflexAdmin",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "reflexQuoter",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_reflexQuoter", "type": "address" }],
+      "name": "setReflexQuoter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "bytes32", "name": "triggerPoolId", "type": "bytes32" },
+        { "internalType": "uint112", "name": "swapAmountIn", "type": "uint112" },
+        { "internalType": "bool", "name": "token0In", "type": "bool" },
+        { "internalType": "address", "name": "recipient", "type": "address" },
+        { "internalType": "bytes32", "name": "configId", "type": "bytes32" }
+      ],
+      "name": "triggerBackrun",
+      "outputs": [
+        { "internalType": "uint256", "name": "profit", "type": "uint256" },
+        { "internalType": "address", "name": "profitToken", "type": "address" }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "bytes32", "name": "triggerPoolId", "type": "bytes32" },
+        { "internalType": "uint112", "name": "swapAmountIn", "type": "uint112" },
+        { "internalType": "bool", "name": "token0In", "type": "bool" },
+        { "internalType": "address", "name": "recipient", "type": "address" },
+        { "internalType": "bytes32", "name": "configId", "type": "bytes32" }
+      ],
+      "name": "triggerBackrunSafe",
+      "outputs": [
+        { "internalType": "uint256", "name": "profit", "type": "uint256" },
+        { "internalType": "address", "name": "profitToken", "type": "address" }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address[]", "name": "_recipients", "type": "address[]" },
+        { "internalType": "uint256[]", "name": "_sharesBps", "type": "uint256[]" },
+        { "internalType": "uint256", "name": "_variedShareBps", "type": "uint256" }
+      ],
+      "name": "updateDefaultConfig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "bytes32", "name": "configId", "type": "bytes32" },
+        { "internalType": "address[]", "name": "_recipients", "type": "address[]" },
+        { "internalType": "uint256[]", "name": "_sharesBps", "type": "uint256[]" },
+        { "internalType": "uint256", "name": "_variedShareBps", "type": "uint256" }
+      ],
+      "name": "updateShares",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "internalType": "address payable", "name": "_to", "type": "address" }
+      ],
+      "name": "withdrawEth",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "token", "type": "address" },
+        { "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "internalType": "address", "name": "_to", "type": "address" }
+      ],
+      "name": "withdrawToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    { "stateMutability": "payable", "type": "receive" }
+  ]
+}

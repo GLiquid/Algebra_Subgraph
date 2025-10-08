@@ -12,11 +12,10 @@ import {
   Bundle,
   PoolHourData,
   FeeHourData,
-  UserVolumeAllTimeData,
+  UserVolumeAllTimeData
 } from '../types/schema'
 import { FACTORY_ADDRESS } from './chain'
 import { ethereum, BigInt, BigDecimal, Bytes } from '@graphprotocol/graph-ts'
-
 
 /**
  * Tracks global aggregate data over daily windows
@@ -41,7 +40,6 @@ export function updateAlgebraDayData(event: ethereum.Event): AlgebraDayData {
   algebraDayData.save()
   return algebraDayData as AlgebraDayData
 }
-
 
 /**
  * Tracks global aggregate data over hour windows
@@ -116,41 +114,39 @@ export function updatePoolDayData(event: ethereum.Event): PoolDayData {
   return poolDayData as PoolDayData
 }
 
-export function updateFeeHourData(event: ethereum.Event, Fee: BigInt): void{
+export function updateFeeHourData(event: ethereum.Event, Fee: BigInt): void {
   let timestamp = event.block.timestamp.toI32()
-  let hourIndex = timestamp / 3600 
+  let hourIndex = timestamp / 3600
   let hourStartUnix = hourIndex * 3600
   let hourFeeID = event.address
     .toHexString()
     .concat('-')
     .concat(hourIndex.toString())
   let FeeHourDataEntity = FeeHourData.load(hourFeeID)
-  if(FeeHourDataEntity){
+  if (FeeHourDataEntity) {
     FeeHourDataEntity.timestamp = BigInt.fromI32(hourStartUnix)
     FeeHourDataEntity.fee += Fee
     FeeHourDataEntity.changesCount += ONE_BI
-    if(FeeHourDataEntity.maxFee < Fee) FeeHourDataEntity.maxFee = Fee
-    if(FeeHourDataEntity.minFee > Fee) FeeHourDataEntity.minFee = Fee  
+    if (FeeHourDataEntity.maxFee < Fee) FeeHourDataEntity.maxFee = Fee
+    if (FeeHourDataEntity.minFee > Fee) FeeHourDataEntity.minFee = Fee
     FeeHourDataEntity.endFee = Fee
-  }
-  else{
+  } else {
     FeeHourDataEntity = new FeeHourData(hourFeeID)
     FeeHourDataEntity.timestamp = BigInt.fromI32(hourStartUnix)
     FeeHourDataEntity.fee = Fee
     FeeHourDataEntity.changesCount = ONE_BI
     FeeHourDataEntity.pool = event.address.toHexString()
-    if(Fee != ZERO_BI){
+    if (Fee != ZERO_BI) {
       FeeHourDataEntity.startFee = Fee
       FeeHourDataEntity.endFee = Fee
-      FeeHourDataEntity.maxFee = Fee 
-      FeeHourDataEntity.minFee = Fee 
+      FeeHourDataEntity.maxFee = Fee
+      FeeHourDataEntity.minFee = Fee
     } else {
       FeeHourDataEntity.startFee = ZERO_BI
       FeeHourDataEntity.endFee = ZERO_BI
-      FeeHourDataEntity.maxFee = ZERO_BI 
-      FeeHourDataEntity.minFee = ZERO_BI 
+      FeeHourDataEntity.maxFee = ZERO_BI
+      FeeHourDataEntity.minFee = ZERO_BI
     }
-
   }
   FeeHourDataEntity.save()
 }
@@ -247,7 +243,6 @@ export function updateTokenDayData(token: Token, event: ethereum.Event): TokenDa
   return tokenDayData as TokenDayData
 }
 
-
 export function updateTokenHourData(token: Token, event: ethereum.Event): TokenHourData {
   let bundle = Bundle.load('1')!
   let timestamp = event.block.timestamp.toI32()
@@ -291,17 +286,13 @@ export function updateTokenHourData(token: Token, event: ethereum.Event): TokenH
   return tokenHourData as TokenHourData
 }
 
-export function updateUserVolumeAllTimeData(
-  user: Bytes,
-  volumeUSD: BigDecimal,
-  event: ethereum.Event
-): void {
+export function updateUserVolumeAllTimeData(user: Bytes, volumeUSD: BigDecimal, event: ethereum.Event): void {
   let timestamp = event.block.timestamp.toI32()
-  let date = timestamp / 86400 * 86400 // start of the day
+  let date = (timestamp / 86400) * 86400 // start of the day
   let userVolumeAllTimeDataID = user.toHexString()
   let userVolumeAllTimeData = UserVolumeAllTimeData.load(userVolumeAllTimeDataID)
 
-  if(userVolumeAllTimeData === null) {
+  if (userVolumeAllTimeData === null) {
     userVolumeAllTimeData = new UserVolumeAllTimeData(userVolumeAllTimeDataID)
     userVolumeAllTimeData.user = user
     userVolumeAllTimeData.volumeUSD = ZERO_BD
@@ -310,10 +301,10 @@ export function updateUserVolumeAllTimeData(
   }
 
   userVolumeAllTimeData.volumeUSD = userVolumeAllTimeData.volumeUSD.plus(volumeUSD)
-  
+
   if (userVolumeAllTimeData.lastTradeDate < date) {
     userVolumeAllTimeData.lastTradeDate = date
   }
-  
+
   userVolumeAllTimeData.save()
 }

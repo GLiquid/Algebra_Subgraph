@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { BigInt, BigDecimal, ethereum } from '@graphprotocol/graph-ts'
+import { BigInt, BigDecimal, ethereum, Address } from '@graphprotocol/graph-ts'
 import { Transaction } from '../types/schema'
 import { ONE_BI, ZERO_BI, ZERO_BD, ONE_BD } from './constants'
 
@@ -101,4 +101,12 @@ export function loadTransaction(event: ethereum.Event): Transaction {
   transaction.index = event.transaction.index
   transaction.save()
   return transaction as Transaction
+}
+
+export function addressArrayToStrings(addresses: Address[]): string[] {
+  let result: string[] = []
+  for (let i = 0; i < addresses.length; i++) {
+    result.push(addresses[i].toHexString())
+  }
+  return result
 }
