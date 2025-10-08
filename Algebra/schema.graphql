@@ -125,7 +125,7 @@ type Pool @entity(immutable: false) {
   # all time fees collected derived USD
   collectedFeesUSD: BigDecimal!
   #
-  lastMintIndex: BigInt! 
+  lastMintIndex: BigInt!
   # total token 0 across all ticks
   totalValueLockedToken0: BigDecimal!
   # total token 1 across all ticks
@@ -242,7 +242,7 @@ type Position @entity(immutable: false) {
   transaction: Transaction!
 }
 
-type PositionSnapshot @entity(immutable: true){
+type PositionSnapshot @entity(immutable: true) {
   # <NFT token id>#<block number>
   id: ID!
   # owner of the NFT
@@ -537,7 +537,7 @@ type PoolDayData @entity(immutable: false) {
   close: BigDecimal!
 }
 
-type PoolFeeData @entity(immutable: false){
+type PoolFeeData @entity(immutable: false) {
   id: ID!
 
   pool: String
@@ -545,7 +545,6 @@ type PoolFeeData @entity(immutable: false){
   timestamp: BigInt!
 
   fee: BigInt!
-
 }
 
 type PositionTransferCache @entity(immutable: false) {
@@ -705,7 +704,7 @@ type FeeHourData @entity(immutable: false) {
   #
   startFee: BigInt!
   #
-  endFee: BigInt! 
+  endFee: BigInt!
 }
 
 type UserVolumeAllTimeData @entity {
@@ -719,4 +718,18 @@ type UserVolumeAllTimeData @entity {
   firstTradeDate: Int!
   # date of last trade in unix timestamp for start of day
   lastTradeDate: Int!
+}
+
+type ReflexMevReward @entity {
+  id: Bytes!
+  token: Token!
+  totalAmount: BigInt!
+  transaction: Transaction!
+  otherAmounts: [BigInt!]!
+  traderShare: BigInt!
+  recipientTrader: ID!
+  otherRecipients: [ID!]!
+  totalAmountUSD: BigDecimal!
+  traderShareUSD: BigDecimal!
+  otherAmountsUSD: [BigDecimal!]!
 }
